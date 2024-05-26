@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider12/provider.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart'; // Import speech_to_text
@@ -45,12 +46,29 @@ class _ChatScreenState extends State<ChatScreen> {
       SpeechToText(); // Create SpeechToText object
   bool _isListening = false;
   String voiceData = '';
+  FlutterTts flutterTts = FlutterTts();
+
+  String? language;
+  String? engine;
+  double volume = 0.5;
+  double pitch = 1.0;
+  double rate = 0.5;
+  bool isCurrentLanguageInstalled = false;
+
+  String? _newVoiceText;
+  int? _inputLength;
+
+  bool isSpeaking = false;
+  bool isboy = false;
 
   @override
   void initState() {
     super.initState();
 
     _speechToText.listen(onResult: (result) => _onRecognitionResult(result));
+
+    _getDefaultEngine();
+    _getDefaultVoice();
   }
 
   @override
@@ -58,13 +76,57 @@ class _ChatScreenState extends State<ChatScreen> {
     return ChangeNotifierProvider.value(
       value: state,
       child: Scaffold(
-        appBar: AppBar(title: Text("Buddy")),
+        appBar: AppBar(
+          title: Text("Buddy"),
+          actions: [
+            IconButton(
+              icon: Icon(
+                isboy ? Icons.boy : Icons.girl, // Dynamic icon based on state
+              ),
+              onPressed: () {
+                // Toggle text-to-speech functionality and speaker icon state
+
+                isboy = !isboy;
+                isboy ? flutterTts.setPitch(1.0) : flutterTts.setPitch(2.0);
+                setState(() async {
+                  // flutterTts.speak('hyyyyy');
+                  // print(result);
+
+                  // Implement your text-to-speech logic here, potentially changing voice to female
+                });
+              },
+            ),
+            IconButton(
+              icon: Icon(
+                isSpeaking
+                    ? Icons.volume_up
+                    : Icons.volume_off, // Dynamic icon based on state
+              ),
+              onPressed: () {
+                // Toggle text-to-speech functionality and speaker icon state
+                setState(() {
+                  isSpeaking = !isSpeaking;
+                  isSpeaking ? flutterTts.speak(voiceData) : flutterTts.stop();
+
+                  // Implement your text-to-speech logic here, potentially changing voice to female
+                });
+              },
+            ),
+          ],
+        ),
         body: Column(
           children: [
             Expanded(child: MessageList(messages: state.messages)),
             Container(
+              margin: EdgeInsets.all(10),
               decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: Colors.grey, width: 0.5)),
+                borderRadius: BorderRadius.all(Radius.circular(16)),
+                border: Border(
+                    top: BorderSide(
+                  color: Colors.grey,
+                  width: 0.5,
+                  style: BorderStyle.solid,
+                )),
               ),
               child: Row(
                 children: [
@@ -165,5 +227,37 @@ class _ChatScreenState extends State<ChatScreen> {
 
       // _controller.text = result.recognizedWords;
     }
+  }
+
+  Future _speak({required String text}) async {
+    var result = await flutterTts.speak(text);
+    // if (result == 1) setState(() => ttsState = TtsState.playing);
+  }
+
+  Future _stop() async {
+    var result = await flutterTts.stop();
+    // if (result == 1) setState(() => ttsState = TtsState.stopped);
+  }
+
+  Future<dynamic> _getLanguages() async => await flutterTts.getLanguages;
+
+  Future<dynamic> _getEngines() async => await flutterTts.getEngines;
+
+  Future<void> _getDefaultEngine() async {
+    var engine = await flutterTts.getDefaultEngine;
+    if (engine != null) {
+      print(engine);
+    }
+  }
+
+  Future<void> _getDefaultVoice() async {
+    var voice = await flutterTts.getDefaultVoice;
+    if (voice != null) {
+      print(voice);
+    }
+  }
+
+  Future<void> _setAwaitOptions() async {
+    await flutterTts.awaitSpeakCompletion(true);
   }
 }

@@ -1,9 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:hybuddy/mesage.dart';
 
 class ChatState with ChangeNotifier {
   final List<Message> messages = [];
+  FlutterTts flutterTts = FlutterTts();
 
   final Dio dio = Dio();
 
@@ -30,7 +32,9 @@ class ChatState with ChangeNotifier {
         String textData = response.data['system_response'];
 
         messages.insert(0, Message(textData, false));
+
         notifyListeners();
+        flutterTts.speak(textData);
       } else {
         // Handle unsuccessful response (e.g., print error message)
         print('Error creating data: ${response.statusCode}');

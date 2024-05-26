@@ -31,6 +31,19 @@ class MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: !message.isUser ? Colors.blue : Colors.grey[300],
+        borderRadius: message.isUser
+            ? BorderRadius.only(
+                topLeft: Radius.circular(40),
+                bottomLeft: Radius.circular(40),
+                topRight: Radius.circular(40))
+            : BorderRadius.only(
+                topLeft: Radius.circular(40),
+                bottomRight: Radius.circular(40),
+                topRight: Radius.circular(40)),
+      ),
       padding: EdgeInsets.all(16),
       child: Text(message.text),
       alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
